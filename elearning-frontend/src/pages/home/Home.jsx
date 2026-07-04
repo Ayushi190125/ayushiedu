@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./home.css";
-import Testimonials from "../../components/testimonials/Testimonials";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -92,8 +91,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Review Testimonials */}
-      <Testimonials />
 
       {/* Bottom CTA Block */}
       <section className="home-bottom-cta-section">
