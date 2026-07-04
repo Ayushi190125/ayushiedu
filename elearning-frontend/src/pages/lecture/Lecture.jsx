@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
-  const [lecture, setLecture] = useState([]);
+  const [lecture, setLecture] = useState({});
   const [loading, setLoading] = useState(true);
   const [lecLoading, setLecLoading] = useState(false);
   const [show, setShow] = useState(false);
@@ -20,8 +20,46 @@ const Lecture = ({ user }) => {
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
 
-  if (user && user.role !== "admin" && !user.subscription.includes(params.id))
+  // New progress & quiz states
+  const [completedLectures, setCompletedLectures] = useState([]);
+  const [progressPercentage, setProgressPercentage] = useState(0);
+
+  if (user && user.role !== "admin" && user.role !== "teacher" && !user.subscription.includes(params.id))
     return navigate("/");
+
+  // Fetch course progress
+  async function fetchProgress() {
+    try {
+      const { data } = await axios.get(`${server}/api/progress/course/${params.id}`, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      setCompletedLectures(data.completedLectures || []);
+      setProgressPercentage(data.percentage || 0);
+    } catch (error) {
+      console.log("Error fetching progress:", error);
+    }
+  }
+
+  // Mark lecture completed
+  async function markCompleted(lectureId) {
+    try {
+      const { data } = await axios.post(
+        `${server}/api/progress/complete`,
+        { courseId: params.id, lectureId },
+        {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        }
+      );
+      toast.success(data.message);
+      fetchProgress();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to mark completed");
+    }
+  }
 
   async function fetchLectures() {
     try {
@@ -119,6 +157,7 @@ const Lecture = ({ user }) => {
 
   useEffect(() => {
     fetchLectures();
+    fetchProgress();
   }, []);
 
   return (
@@ -132,48 +171,118 @@ const Lecture = ({ user }) => {
               <Loading />
             ) : (
               <>
-                {lecture.video ? (
+                {lecture && lecture.video ? (
                   <>
-                    <video
-                      src={`${server}/${lecture.video}`}
-                      width={"100%"}
-                      controls
-                      controlsList="nodownload noremoteplayback"
-                      disablePictureInPicture
-                      disableRemotePlayback
-                      autoPlay
-                    ></video>
+                    {lecture.video.includes("youtube.com") || lecture.video.includes("youtu.be") ? (
+                      <iframe
+                        width="100%"
+                        height="450"
+                        src={
+                          lecture.video.includes("youtube.com/watch")
+                            ? `https://www.youtube.com/embed/${new URLSearchParams(new URL(lecture.video).search).get("v")}`
+                            : lecture.video.includes("youtu.be/")
+                            ? `https://www.youtube.com/embed/${lecture.video.split("youtu.be/")[1]?.split("?")[0]}`
+                            : lecture.video.includes("youtube.com/live/")
+                            ? `https://www.youtube.com/embed/${lecture.video.split("youtube.com/live/")[1]?.split("?")[0]}`
+                            : lecture.video
+                        }
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ borderRadius: "16px", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}
+                      ></iframe>
+                    ) : (
+                      <video
+                        src={`${server}/${lecture.video}`}
+                        width={"100%"}
+                        controls
+                        controlsList="nodownload noremoteplayback"
+                        disablePictureInPicture
+                        disableRemotePlayback
+                        autoPlay
+                        onEnded={() => markCompleted(lecture._id)}
+                      ></video>
+                    )}
                     <h1>{lecture.title}</h1>
                     <h3>{lecture.description}</h3>
+
+                    {/* Progress Action Controls */}
+                    <div className="action-buttons-container">
+                      {completedLectures.includes(lecture._id) ? (
+                        <div className="completed-badge">
+                          ✓ Lecture Completed
+                        </div>
+                      ) : (
+                        <button
+                          className="complete-btn"
+                          onClick={() => markCompleted(lecture._id)}
+                        >
+                          Mark as Completed
+                        </button>
+                      )}
+
+                      <button
+                        className="quiz-btn"
+                        onClick={() => navigate(`/quiz/${params.id}`)}
+                      >
+                        ✍ Take Quiz
+                      </button>
+
+                      {progressPercentage === 100 && (
+                        <button
+                          className="cert-btn"
+                          onClick={() => navigate(`/certificate/${params.id}`)}
+                        >
+                          🎓 Claim Certificate
+                        </button>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <div>
-                    <p>
+                    <p style={{ fontSize: "1.2rem", lineHeight: "1.6", color: "#94a3b8" }}>
                       📚 <strong>Welcome to this course!</strong> Select a lecture
-                      from the list on the right to start watching. This course
-                      includes high-quality video lectures, detailed explanations,
-                      and hands-on practice activities to help reinforce your learning.
+                      from the list on the right to start watching. Complete all lectures to unlock the course quiz and claim your graduation certificate.
                     </p>
 
-                    <h3 style={{ marginTop: "20px" }}>🎥 Available Lectures:</h3>
+                    <h3 style={{ marginTop: "30px", borderLeft: "4px solid #a855f7", paddingLeft: "15px" }}>
+                      🎥 Available Lectures:
+                    </h3>
                     {lectures && lectures.length > 0 ? (
                       <div className="lecture-preview-list">
                         {lectures.map((lec, index) => (
                           <div
                             key={lec._id}
-                            style={{ marginBottom: "20px", cursor: "pointer" }}
+                            className="preview-card"
                             onClick={() => fetchLecture(lec._id)}
                           >
-                            <video
-                              src={`${server}/${lec.video}`}
-                              width="100%"
-                              style={{ borderRadius: "8px" }}
-                              muted
-                              loop
-                              onMouseOver={(e) => e.target.play()}
-                              onMouseOut={(e) => e.target.pause()}
-                            />
-                            <h4>{index + 1}. {lec.title}</h4>
+                            {lec.video && (lec.video.includes("youtube.com") || lec.video.includes("youtu.be")) ? (
+                              <div style={{
+                                width: "100%",
+                                height: "150px",
+                                background: "linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)",
+                                borderRadius: "10px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "2rem",
+                                marginBottom: "12px",
+                                border: "1px solid rgba(255, 255, 255, 0.1)"
+                              }}>
+                                📺
+                              </div>
+                            ) : (
+                              <video
+                                src={`${server}/${lec.video}`}
+                                muted
+                                loop
+                              />
+                            )}
+                            <h4>
+                              {index + 1}. {lec.title}{" "}
+                              {completedLectures.includes(lec._id) && "✓"}
+                            </h4>
                             <p>{lec.description}</p>
                           </div>
                         ))}
@@ -188,17 +297,17 @@ const Lecture = ({ user }) => {
           </div>
 
           <div className="right">
-            {user && user.role === "admin" && (
-              <button className="common-btn" onClick={() => setShow(!show)}>
-                {show ? "Close" : "Add Lecture +"}
+            {(user && (user.role === "admin" || user.role === "teacher")) && (
+              <button className="common-btn" style={{ width: "100%", marginBottom: "15px" }} onClick={() => setShow(!show)}>
+                {show ? "Close Form" : "Add Lecture +"}
               </button>
             )}
 
             {show && (
-              <div className="lecture-form">
+              <div className="lecture-form" style={{ marginBottom: "20px" }}>
                 <h2>Add Lecture</h2>
                 <form onSubmit={submitHandler}>
-                  <label htmlFor="text">Title</label>
+                  <label>Title</label>
                   <input
                     type="text"
                     value={title}
@@ -206,7 +315,7 @@ const Lecture = ({ user }) => {
                     required
                   />
 
-                  <label htmlFor="text">Description</label>
+                  <label>Description</label>
                   <input
                     type="text"
                     value={description}
@@ -216,7 +325,6 @@ const Lecture = ({ user }) => {
 
                   <input
                     type="file"
-                    placeholder="choose video"
                     onChange={changeVideoHandler}
                     required
                   />
@@ -224,9 +332,9 @@ const Lecture = ({ user }) => {
                   {videoPrev && (
                     <video
                       src={videoPrev}
-                      alt=""
-                      width={300}
+                      width="100%"
                       controls
+                      style={{ borderRadius: "8px", margin: "10px 0" }}
                     ></video>
                   )}
 
@@ -234,31 +342,42 @@ const Lecture = ({ user }) => {
                     disabled={btnLoading}
                     type="submit"
                     className="common-btn"
+                    style={{ width: "100%" }}
                   >
-                    {btnLoading ? "Please Wait..." : "Add"}
+                    {btnLoading ? "Please Wait..." : "Add Lecture"}
                   </button>
                 </form>
               </div>
             )}
 
+            <h3 style={{ marginBottom: "15px" }}>Course Progress: {progressPercentage}%</h3>
+            <div className="progress-bar-bg" style={{ marginBottom: "25px", height: "10px" }}>
+              <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }}></div>
+            </div>
+
             {lectures && lectures.length > 0 ? (
               lectures.map((e, i) => (
-                <div key={i}>
+                <div key={e._id} style={{ display: "flex", flexDirection: "column" }}>
                   <div
                     onClick={() => fetchLecture(e._id)}
                     className={`lecture-number ${
-                      lecture._id === e._id && "active"
+                      lecture._id === e._id ? "active" : ""
                     }`}
                   >
-                    {i + 1}. {e.title}
+                    <span>
+                      {i + 1}. {e.title}
+                    </span>
+                    {completedLectures.includes(e._id) && (
+                      <span style={{ color: "#10b981", fontWeight: "bold" }}>✓</span>
+                    )}
                   </div>
-                  {user && user.role === "admin" && (
+                  {(user && (user.role === "admin" || user.role === "teacher")) && (
                     <button
                       className="common-btn"
-                      style={{ background: "red" }}
+                      style={{ background: "red", marginTop: "-5px", marginBottom: "15px", fontSize: "14px", padding: "6px" }}
                       onClick={() => deleteHandler(e._id)}
                     >
-                      Delete {e.title}
+                      Delete
                     </button>
                   )}
                 </div>

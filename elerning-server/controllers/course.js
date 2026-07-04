@@ -4,7 +4,7 @@ import { Lecture } from "../models/Lecture.js";
 import { User } from "../models/User.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {
-  const courses = await Courses.find();
+  const courses = await Courses.find().sort({ createdAt: 1 });
   res.send({
     courses,
   });
@@ -18,7 +18,7 @@ export const getSingleCourse = TryCatch(async (req, res) => {
 });
 
 export const fetchLectures = TryCatch(async (req, res) => {
-  const lectures = await Lecture.find({ course: req.params.id });
+  const lectures = await Lecture.find({ course: req.params.id }).sort({ createdAt: 1 });
   const user = await User.findById(req.user._id);
 
   if (user.role === "admin") {
@@ -27,7 +27,7 @@ export const fetchLectures = TryCatch(async (req, res) => {
 
   if (!user.subscription.includes(req.params.id))
     return res.status(400).json({
-      message: "You are not buy this house",
+      message: "You are not buy this course",
     });
 
   res.json({ lectures });
@@ -50,7 +50,7 @@ export const fetchLecture = TryCatch(async (req, res) => {
 });
 
 export const getMyCourses = TryCatch(async (req, res) => {
-  const courses = await Courses.find({ _id: req.user.subscription });
+  const courses = await Courses.find({ _id: req.user.subscription }).sort({ createdAt: 1 });
   res.json({
     courses,
   });
@@ -62,7 +62,7 @@ export const checkout = TryCatch(async (req, res) => {
 
   if (user.subscription.includes(course._id)) {
     return res.status(400).json({
-      message: "You already buy this house",
+      message: "You already buy this course",
     });
   }
 
@@ -71,7 +71,15 @@ export const checkout = TryCatch(async (req, res) => {
   await user.save();
 
   res.status(201).json({
-    message: "Buy House Successfully",
+    message: "Buy Course Successfully",
     course,
   });
+});
+
+export const getDemoLecture = TryCatch(async (req, res) => {
+  const lecture = await Lecture.findOne({ course: req.params.id }).sort({ createdAt: 1 });
+  if (!lecture) {
+    return res.status(404).json({ message: "No demo lecture available for this course" });
+  }
+  res.json({ lecture });
 });

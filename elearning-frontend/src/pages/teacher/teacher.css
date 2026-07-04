@@ -1,0 +1,158 @@
+.teacher-dashboard {
+  padding: 100px 5% 50px;
+  background: radial-gradient(circle at 10% 20%, rgba(20, 24, 33, 1) 0%, rgba(10, 12, 16, 1) 90.2%);
+  min-height: 85vh;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+}
+
+.teacher-dashboard h2 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.teacher-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+  margin-bottom: 45px;
+}
+
+.teacher-stat-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.teacher-stat-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.teacher-stat-card h3 {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.teacher-stat-card .stat-value {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f1f5f9 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.teacher-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.teacher-action-bar h3 {
+  font-size: 1.8rem;
+  border-left: 4px solid #3b82f6;
+  padding-left: 15px;
+}
+
+.teacher-courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.teacher-courses-table th,
+.teacher-courses-table td {
+  padding: 18px 24px;
+  text-align: left;
+}
+
+.teacher-courses-table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.teacher-courses-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+.teacher-courses-table tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.teacher-courses-table td {
+  color: #e2e8f0;
+}
+
+.teacher-students-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.student-progress-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.student-progress-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.student-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.student-card-header h4 {
+  font-size: 1.3rem;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.student-card-header p {
+  margin: 5px 0 0 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.student-course-progress-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.student-course-progress-item {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}

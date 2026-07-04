@@ -1,0 +1,111 @@
+.certificate-page-container {
+  padding: 100px 5% 50px;
+  background: radial-gradient(circle at 10% 20%, rgba(26, 20, 35, 1) 0%, rgba(13, 10, 18, 1) 90.2%);
+  min-height: 85vh;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Stunning Certificate Box */
+.certificate-frame {
+  width: 100%;
+  max-width: 800px;
+  background: #fff;
+  color: #0f172a;
+  padding: 50px;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+  border: 12px double #8b5cf6;
+  text-align: center;
+}
+
+.certificate-header h1 {
+  font-family: 'Georgia', serif;
+  font-size: 2.8rem;
+  color: #1e1b4b;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.certificate-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 10px 0 30px 0;
+}
+
+.certificate-present {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.certificate-student-name {
+  font-size: 2.5rem;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  color: #8b5cf6;
+  border-bottom: 2px solid #e2e8f0;
+  display: inline-block;
+  padding: 0 40px 10px 40px;
+  margin-bottom: 20px;
+}
+
+.certificate-text {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #334155;
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+}
+
+.certificate-course-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.certificate-footer-signatures {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 40px;
+}
+
+.signature-line {
+  border-top: 1px solid #94a3b8;
+  width: 180px;
+  padding-top: 8px;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.signature-img {
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: -5px;
+}
+
+.certificate-id-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.certificate-verification-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 600px;
+  text-align: center;
+}

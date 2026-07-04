@@ -15,34 +15,14 @@ export const register = TryCatch(async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  user = {
+  await User.create({
     name,
     email,
     password: hashPassword,
-  };
+  });
 
-  const otp = Math.floor(Math.random() * 1000000);
-
-  const activationToken = jwt.sign(
-    {
-      user,
-      otp,
-    },
-    process.env.Activation_Secret,
-    {
-      expiresIn: "5m",
-    }
-  );
-
-  const data = {
-    name,
-    otp,
-  };
-
-
-  res.status(200).json({
-    message: "Otp is 1234",
-    activationToken,
+  res.status(201).json({
+    message: "User Registered Successfully. Please Login!",
   });
 });
 

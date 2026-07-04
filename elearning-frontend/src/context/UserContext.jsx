@@ -43,9 +43,8 @@ export const UserContextProvider = ({ children }) => {
       });
 
       toast.success(data.message);
-      localStorage.setItem("activationToken", data.activationToken);
       setBtnLoading(false);
-      navigate("/verify");
+      navigate("/login");
     } catch (error) {
       setBtnLoading(false);
       toast.error(error.response.data.message);

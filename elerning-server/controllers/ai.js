@@ -1,0 +1,188 @@
+import TryCatch from "../middlewares/TryCatch.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Lecture } from "../models/Lecture.js";
+
+// Helper to get Gemini client or return fallback
+const getGeminiModel = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === "your_gemini_api_key_here") {
+    return null;
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+};
+
+// AI Tutor chat endpoint
+export const aiTutor = TryCatch(async (req, res) => {
+  const { question, lectureId, chatHistory } = req.body;
+  const model = getGeminiModel();
+
+  if (!model) {
+    return res.status(200).json({
+      reply: "🤖 **[Demo Mode - Gemini API Key Not Configured]**\n\nTo enable full AI responses, please add your `GEMINI_API_KEY` to the server's `.env` file.\n\n*Here is a standard Tutor response:*\nThat is a great question! Based on typical learning patterns, this topic builds directly on core concepts. Try breaking it down into smaller components and studying the examples provided in the lecture details.",
+    });
+  }
+
+  let lectureContext = "";
+  if (lectureId) {
+    const lecture = await Lecture.findById(lectureId);
+    if (lecture) {
+      lectureContext = `Use this lecture context to answer: Lecture Title is "${lecture.title}" and Description is "${lecture.description}".\n`;
+    }
+  }
+
+  // Construct context-rich prompt
+  const systemInstruction = "You are a helpful, encouraging, and knowledgeable AI Tutor on our e-learning platform. Give clear, educational responses using markdown formatting.";
+  const prompt = `${systemInstruction}\n\n${lectureContext}User Question: ${question}`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  res.status(200).json({ reply: response.text() });
+});
+
+// AI Explain Topic
+export const aiExplainTopic = TryCatch(async (req, res) => {
+  const { topic } = req.body;
+  const model = getGeminiModel();
+
+  if (!model) {
+    return res.status(200).json({
+      explanation: `🤖 **[Demo Mode - Gemini API Key Not Configured]**\n\n### Explanation of: ${topic}\n\n1. **What is it?**\n   This topic refers to key concepts within the subject. Without the Gemini API Key, we cannot generate a dynamic breakdown.\n2. **Key Elements**\n   - Core concepts and structure\n   - Practical applications and real-world examples\n   - Common workflows and templates\n3. **Pro Tip**\n   Configure the \`GEMINI_API_KEY\` in your environment to get beautiful, custom AI-generated explanations!`,
+    });
+  }
+
+  const prompt = `Provide a comprehensive, high-quality explanation of the topic: "${topic}". 
+Structure the explanation with clear sections: 
+- 🌟 **Introduction / Overview**
+- 🔑 **Key Concepts & Core Ideas**
+- 💡 **Real-world Examples / Use Cases**
+- 📝 **Summary / Quick Takeaway**
+Use rich markdown formatting, bold points, and clean typography.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  res.status(200).json({ explanation: response.text() });
+});
+
+// AI Quiz Generator
+export const aiGenerateQuiz = TryCatch(async (req, res) => {
+  const { topic, numQuestions } = req.body;
+  const model = getGeminiModel();
+
+  const count = numQuestions || 5;
+
+  if (!model) {
+    // Return standard mock quiz
+    return res.status(200).json({
+      quiz: [
+        {
+          questionText: `What is the primary concept of ${topic}?`,
+          options: ["Option A: Foundation theory", "Option B: Secondary application", "Option C: Debugging mode", "Option D: None of the above"],
+          correctAnswer: 0,
+          explanation: "Option A represents the primary conceptual foundation of this topic."
+        },
+        {
+          questionText: `Which of the following is true about ${topic}?`,
+          options: ["It is only used locally", "It scales efficiently in modern frameworks", "It has been fully deprecated", "None of these"],
+          correctAnswer: 1,
+          explanation: "Modern frameworks support this because it provides optimized scaling."
+        }
+      ]
+    });
+  }
+
+  const prompt = `Generate a JSON array representing a quiz about the topic: "${topic}".
+The output MUST be a valid JSON array only, without any markdown enclosing backticks, starting with "[" and ending with "]".
+Each object in the array must match this schema exactly:
+{
+  "questionText": "string",
+  "options": ["string", "string", "string", "string"],
+  "correctAnswer": 0, // index of correct option (0, 1, 2, or 3)
+  "explanation": "string explaining why the answer is correct"
+}
+Generate exactly ${count} questions. Make them high-quality and multiple-choice.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  
+  let jsonText = response.text().trim();
+  // Strip any markdown code fences if generated by AI
+  if (jsonText.startsWith("```json")) {
+    jsonText = jsonText.substring(7, jsonText.length - 3).trim();
+  } else if (jsonText.startsWith("```")) {
+    jsonText = jsonText.substring(3, jsonText.length - 3).trim();
+  }
+
+  try {
+    const quiz = JSON.parse(jsonText);
+    res.status(200).json({ quiz });
+  } catch (error) {
+    // If parsing fails, fall back to a raw text explanation or a mock
+    console.error("Gemini JSON Parsing failed: ", jsonText);
+    res.status(500).json({ message: "Failed to generate structured quiz, please try again" });
+  }
+});
+
+// AI Assignment Checker
+export const aiCheckAssignment = TryCatch(async (req, res) => {
+  const { title, content } = req.body;
+  const model = getGeminiModel();
+
+  if (!model) {
+    return res.status(200).json({
+      score: 85,
+      feedback: "🤖 **[Demo Mode - Gemini API Key Not Configured]**\n\nYour submission is well written and touches on key deliverables. Great structure, clear headings, and precise execution.\n\n*Suggestions for Improvement:*\n- Add more citations or supporting reference points.\n- Elaborate further on practical applications.",
+    });
+  }
+
+  const prompt = `Grade this assignment. 
+Assignment Title: "${title}"
+Student Submission: "${content}"
+
+Please evaluate the submission out of 100 points, and provide constructive feedback.
+The output format must be EXACTLY a JSON object matching this schema:
+{
+  "score": 85, // number representing grade
+  "feedback": "markdown string summarizing strengths, weaknesses, grammar, and areas for improvement"
+}
+Output ONLY the JSON object, do not include any wrapping markdown blocks.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  
+  let jsonText = response.text().trim();
+  if (jsonText.startsWith("```json")) {
+    jsonText = jsonText.substring(7, jsonText.length - 3).trim();
+  } else if (jsonText.startsWith("```")) {
+    jsonText = jsonText.substring(3, jsonText.length - 3).trim();
+  }
+
+  try {
+    const data = JSON.parse(jsonText);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(200).json({
+      score: 75,
+      feedback: response.text(), // return raw text if JSON conversion fails
+    });
+  }
+});
+
+// AI Notes Generator
+export const aiGenerateNotes = TryCatch(async (req, res) => {
+  const { topic } = req.body;
+  const model = getGeminiModel();
+
+  if (!model) {
+    return res.status(200).json({
+      notes: `🤖 **[Demo Mode - Gemini API Key Not Configured]**\n\n# Study Notes: ${topic}\n\n## 1. Core Principles\n- Principle A: Essential definitions and standard structures.\n- Principle B: Relationship to overall workflows and processes.\n\n## 2. Key Takeaways\n- Always test applications across multiple browser contexts.\n- Keep logic modular and components reuseable.`,
+    });
+  }
+
+  const prompt = `Generate comprehensive, clear, and summarized study notes for the topic/subject: "${topic}".
+Use markdown to format the study notes perfectly with headings, bullet points, checklists, bold text, and code snippets where applicable. Ensure they are easy to read and understand.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  res.status(200).json({ notes: response.text() });
+});

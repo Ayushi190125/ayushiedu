@@ -25,6 +25,39 @@ const schema = new mongoose.Schema(
         ref: "Courses",
       },
     ],
+    progress: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Courses",
+        },
+        completedLectures: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Lecture",
+          },
+        ],
+        completedAt: {
+          type: Date,
+          default: null,
+        },
+      },
+    ],
+    certificates: [
+      {
+        course: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Courses",
+        },
+        issuedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        certificateId: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

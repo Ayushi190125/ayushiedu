@@ -5,7 +5,6 @@ import Home from "./pages/home/Home";
 import Header from "./components/header/Header";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-import Verify from "./pages/auth/Verify";
 import Footer from "./components/footer/Footer";
 import About from "./pages/about/About";
 import Account from "./pages/account/Account";
@@ -21,6 +20,12 @@ import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 
+// New page imports
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import TeacherStudents from "./pages/teacher/TeacherStudents";
+import Quiz from "./pages/quiz/Quiz";
+import Certificate from "./pages/certificate/Certificate";
+
 const App = () => {
   const { isAuth, user, loading } = UserData();
   return (
@@ -29,7 +34,7 @@ const App = () => {
         <Loading />
       ) : (
         <BrowserRouter>
-          <Header isAuth={isAuth} />
+          <Header isAuth={isAuth} user={user} />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
@@ -43,7 +48,6 @@ const App = () => {
               path="/register"
               element={isAuth ? <Home /> : <Register />}
             />
-            <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
             <Route
               path="/course/:id"
               element={isAuth ? <CourseDescription user={user} /> : <Login />}
@@ -66,6 +70,28 @@ const App = () => {
               element={isAuth ? <Lecture user={user} /> : <Login />}
             />
 
+            {/* Teacher Routes */}
+            <Route
+              path="/teacher/dashboard"
+              element={isAuth ? <TeacherDashboard user={user} /> : <Login />}
+            />
+            <Route
+              path="/teacher/students"
+              element={isAuth ? <TeacherStudents user={user} /> : <Login />}
+            />
+
+            {/* Quiz & Certificate Routes */}
+            <Route
+              path="/quiz/:id"
+              element={isAuth ? <Quiz user={user} /> : <Login />}
+            />
+            <Route
+              path="/certificate/:id"
+              element={isAuth ? <Certificate user={user} /> : <Login />}
+            />
+
+
+            {/* Admin Routes */}
             <Route
               path="/admin/dashboard"
               element={isAuth ? <AdminDashbord user={user} /> : <Login />}
