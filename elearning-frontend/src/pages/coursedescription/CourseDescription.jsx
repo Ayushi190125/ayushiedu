@@ -72,7 +72,7 @@ const CourseDescription = ({ user }) => {
         <Loading />
       ) : (
         <>
-          {course && (
+          {course && course._id && (
             <div className="course-description">
               <div className="course-header">
                 <img
