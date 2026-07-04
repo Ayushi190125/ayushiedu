@@ -106,7 +106,7 @@ export const UserContextProvider = ({ children }) => {
       }}
     >
       {children}
-      <Toaster />
+      <Toaster position="top-center" />
     </UserContext.Provider>
   );
 };

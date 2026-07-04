@@ -28,15 +28,36 @@
   --card-bg-solid: #ffffff;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  overflow-x: hidden;
   box-sizing: border-box;
+}
+
+body {
   font-family: 'Outfit', 'Poppins', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Force hot-toast container to center on mobile */
+@media (max-width: 768px) {
+  div[style*="position: fixed"][style*="z-index"] {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+    width: 90% !important;
+    max-width: 400px !important;
+  }
+  
+  div[style*="position: fixed"][style*="z-index"] > div {
+    justify-content: center !important;
+  }
+}
+
 
 .common-btn {
   background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
