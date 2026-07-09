@@ -20,7 +20,7 @@ const CourseDescription = ({ user }) => {
 
   useEffect(() => {
     fetchCourse(params.id);
-  }, [params.id, fetchCourse]);
+  }, [params.id]);
 
   // Fetch demo lecture
   async function fetchDemo() {
