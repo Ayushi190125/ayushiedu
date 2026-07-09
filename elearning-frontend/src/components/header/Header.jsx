@@ -27,6 +27,7 @@ const Header = ({ isAuth, user }) => {
   return (
     <header>
       <div className="logo" onClick={() => (window.location.href = "/")}>
+        <img src="/favicon.png" alt="AyushiEdu Logo" className="logo-icon" />
         AyushiEdu
       </div>
 
