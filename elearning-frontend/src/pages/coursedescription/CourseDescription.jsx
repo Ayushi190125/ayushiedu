@@ -41,8 +41,8 @@ const CourseDescription = ({ user }) => {
     setLoading(true);
 
     try {
-      // Simulate a successful purchase without Razorpay
-      const { data } = await axios.post(
+      // Step 1: Create Razorpay order on the backend
+      const { data: orderData } = await axios.post(
         `${server}/api/course/checkout/${params.id}`,
         {},
         {
@@ -52,16 +52,67 @@ const CourseDescription = ({ user }) => {
         }
       );
 
-      // Simulate successful user and course fetching after purchase
-      await fetchUser();
-      await fetchCourses();
-      await fetchMyCourse();
+      // Step 2: Get Razorpay key from backend
+      const { data: keyData } = await axios.get(`${server}/api/razorpay-key`);
 
-      toast.success(data.message || "Purchase successful!");
-      navigate(`/`); // Navigate back home or to study page
+      // Step 3: Open Razorpay checkout popup
+      const options = {
+        key: keyData.key,
+        amount: orderData.order.amount,
+        currency: "INR",
+        name: "AyushiEdu",
+        description: `Purchase: ${orderData.course.title}`,
+        order_id: orderData.order.id,
+        handler: async function (response) {
+          // Step 4: Verify payment on the backend
+          try {
+            const { data: verifyData } = await axios.post(
+              `${server}/api/course/verification/${params.id}`,
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              {
+                headers: {
+                  token,
+                },
+              }
+            );
+
+            // Refresh user data and courses after successful purchase
+            await fetchUser();
+            await fetchCourses();
+            await fetchMyCourse();
+
+            toast.success(verifyData.message);
+            navigate(`/payment-success/${verifyData.paymentId}`);
+          } catch (error) {
+            toast.error(
+              error.response?.data?.message || "Payment verification failed"
+            );
+          }
+          setLoading(false);
+        },
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#8a4baf",
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+            toast.error("Payment cancelled");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
       toast.error(error.response?.data?.message || "Checkout failed");
-    } finally {
       setLoading(false);
     }
   };

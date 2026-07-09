@@ -2,6 +2,20 @@ import TryCatch from "../middlewares/TryCatch.js";
 import { Courses } from "../models/Courses.js";
 import { Lecture } from "../models/Lecture.js";
 import { User } from "../models/User.js";
+import { Payment } from "../models/Payment.js";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+
+let instance;
+function getRazorpayInstance() {
+  if (!instance) {
+    instance = new Razorpay({
+      key_id: process.env.Razorpay_Key,
+      key_secret: process.env.Razorpay_Secret,
+    });
+  }
+  return instance;
+}
 
 export const getAllCourses = TryCatch(async (req, res) => {
   const courses = await Courses.find().sort({ createdAt: 1 });
@@ -66,13 +80,64 @@ export const checkout = TryCatch(async (req, res) => {
     });
   }
 
-  // Directly add the course to the user's subscription
-  user.subscription.push(course._id);
-  await user.save();
+  const options = {
+    amount: Number(course.price * 100), // Razorpay expects amount in paise
+    currency: "INR",
+    receipt: `receipt_${course._id}_${Date.now()}`,
+  };
+
+  const order = await getRazorpayInstance().orders.create(options);
 
   res.status(201).json({
-    message: "Buy Course Successfully",
+    order,
     course,
+  });
+});
+
+export const paymentVerification = TryCatch(async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.body;
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.Razorpay_Secret)
+    .update(body.toString())
+    .digest("hex");
+
+  const isAuthentic = expectedSignature === razorpay_signature;
+
+  if (isAuthentic) {
+    // Store payment record
+    await Payment.create({
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    });
+
+    // Add course to user's subscription
+    const user = await User.findById(req.user._id);
+    const course = await Courses.findById(req.params.id);
+
+    if (!user.subscription.includes(course._id)) {
+      user.subscription.push(course._id);
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: "Course Purchased Successfully",
+      paymentId: razorpay_payment_id,
+    });
+  } else {
+    return res.status(400).json({
+      message: "Payment verification failed",
+    });
+  }
+});
+
+export const getRazorpayKey = TryCatch(async (req, res) => {
+  res.status(200).json({
+    key: process.env.Razorpay_Key,
   });
 });
 

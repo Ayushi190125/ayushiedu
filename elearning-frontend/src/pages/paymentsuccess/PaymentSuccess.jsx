@@ -8,9 +8,12 @@ const PaymentSuccess = ({ user }) => {
     <div className="payment-success-page">
       {user && (
         <div className="success-message">
-          <h2>Payment successful</h2>
+          <div className="success-icon">✓</div>
+          <h2>Payment Successful!</h2>
           <p>Your course subscription has been activated</p>
-          <p>Reference no - {params.id}</p>
+          <p className="reference-id">
+            Payment ID: <strong>{params.id}</strong>
+          </p>
           <Link to={`/${user._id}/dashboard`} className="common-btn">
             Go to Dashboard
           </Link>

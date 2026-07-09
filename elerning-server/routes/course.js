@@ -5,7 +5,9 @@ import {
   fetchLectures,
   fetchLecture,
   getMyCourses,
-  checkout,  // Import the checkout function
+  checkout,
+  paymentVerification,
+  getRazorpayKey,
   getDemoLecture,
 } from "../controllers/course.js";
 import { isAuth } from "../middlewares/isAuth.js";
@@ -18,6 +20,8 @@ router.get("/course/:id/demo", getDemoLecture); // public route for preview
 router.get("/lectures/:id", isAuth, fetchLectures);
 router.get("/lecture/:id", isAuth, fetchLecture);
 router.get("/mycourse", isAuth, getMyCourses);
-router.post("/course/checkout/:id", isAuth, checkout);  // Connect the checkout function
+router.post("/course/checkout/:id", isAuth, checkout);
+router.post("/course/verification/:id", isAuth, paymentVerification);
+router.get("/razorpay-key", getRazorpayKey);
 
 export default router;

@@ -42,7 +42,6 @@ const Lecture = ({ user }) => {
     }
   }
 
-  // Mark lecture completed
   async function markCompleted(lectureId) {
     try {
       const { data } = await axios.post(
@@ -181,10 +180,10 @@ const Lecture = ({ user }) => {
                           lecture.video.includes("youtube.com/watch")
                             ? `https://www.youtube.com/embed/${new URLSearchParams(new URL(lecture.video).search).get("v")}`
                             : lecture.video.includes("youtu.be/")
-                            ? `https://www.youtube.com/embed/${lecture.video.split("youtu.be/")[1]?.split("?")[0]}`
-                            : lecture.video.includes("youtube.com/live/")
-                            ? `https://www.youtube.com/embed/${lecture.video.split("youtube.com/live/")[1]?.split("?")[0]}`
-                            : lecture.video
+                              ? `https://www.youtube.com/embed/${lecture.video.split("youtu.be/")[1]?.split("?")[0]}`
+                              : lecture.video.includes("youtube.com/live/")
+                                ? `https://www.youtube.com/embed/${lecture.video.split("youtube.com/live/")[1]?.split("?")[0]}`
+                                : lecture.video
                         }
                         title="YouTube video player"
                         frameBorder="0"
@@ -237,6 +236,15 @@ const Lecture = ({ user }) => {
                           🎓 Claim Certificate
                         </button>
                       )}
+
+                      {/* AI Tutor shortcut */}
+                      <button
+                        className="common-btn"
+                        style={{ margin: 0, background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 100%)" }}
+                        onClick={() => navigate(`/ai-tutor`, { state: { lectureId: lecture._id } })}
+                      >
+                        🤖 Ask AI Tutor
+                      </button>
                     </div>
                   </>
                 ) : (
@@ -360,9 +368,8 @@ const Lecture = ({ user }) => {
                 <div key={e._id} style={{ display: "flex", flexDirection: "column" }}>
                   <div
                     onClick={() => fetchLecture(e._id)}
-                    className={`lecture-number ${
-                      lecture._id === e._id ? "active" : ""
-                    }`}
+                    className={`lecture-number ${lecture._id === e._id ? "active" : ""
+                      }`}
                   >
                     <span>
                       {i + 1}. {e.title}
