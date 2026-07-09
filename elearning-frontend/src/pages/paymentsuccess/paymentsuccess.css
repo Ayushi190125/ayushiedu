@@ -3,15 +3,18 @@
   align-items: center;
   justify-content: center;
   height: 75vh;
-  background-color: #f5f5f5;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
 
   .success-message {
-    background-color: #fff;
+    background-color: var(--card-bg-solid);
+    border: 1px solid var(--border-color);
     padding: 40px 30px;
     border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 12px var(--shadow-color);
     text-align: center;
     width: 380px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   .success-icon {
@@ -30,24 +33,27 @@
 
   h2 {
     font-size: 24px;
-    color: #8a4baf;
+    color: #a855f7;
     margin-bottom: 10px;
   }
 
   p {
     font-size: 16px;
-    color: #666;
+    color: var(--text-secondary);
     margin-bottom: 15px;
+    transition: color 0.3s ease;
   }
 
   .reference-id {
     font-size: 14px;
-    color: #444;
-    background-color: #f0f0f0;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     padding: 8px 12px;
     border-radius: 6px;
     word-break: break-all;
     margin-bottom: 20px;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   }
 
   a {

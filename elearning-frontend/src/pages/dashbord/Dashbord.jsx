@@ -65,7 +65,7 @@ const Dashbord = () => {
           progressData.overallProgress.map((prog) => (
             <div key={prog.courseId} className="dashboard-course-item">
               <img
-                src={`${server}/${prog.courseImage}`}
+                src={prog.courseImage && prog.courseImage.startsWith("http") ? prog.courseImage : `${server}/${prog.courseImage}`}
                 alt={prog.courseTitle}
                 style={{ width: "100%", height: "200px", objectFit: "cover" }}
               />

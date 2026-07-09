@@ -12,7 +12,7 @@ async function run() {
   const courses = await Courses.find({});
   console.log("Courses found:", courses.length);
   courses.forEach(c => {
-    console.log(`Course: ID=${c._id}, Title=${c.title}, CreatedBy=${c.createdBy}`);
+    console.log(`Course: ID=${c._id}, Title=${c.title}, Image=${c.image}, CreatedBy=${c.createdBy}`);
   });
 
   const lectures = await Lecture.find({});
