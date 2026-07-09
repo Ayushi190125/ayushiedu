@@ -83,7 +83,7 @@ export const checkout = TryCatch(async (req, res) => {
   const options = {
     amount: Number(course.price * 100), // Razorpay expects amount in paise
     currency: "INR",
-    receipt: `receipt_${course._id}_${Date.now()}`,
+    receipt: `rcpt_${course._id.toString().slice(-6)}_${Date.now()}`,
   };
 
   const order = await getRazorpayInstance().orders.create(options);
